@@ -1,0 +1,57 @@
+apply plugin: 'com.android.library'
+apply plugin: 'com.novoda.bintray-release'
+
+android {
+    compileSdkVersion 27
+
+
+
+    defaultConfig {
+        minSdkVersion 16
+        targetSdkVersion 27
+        versionCode 1
+        versionName "1.0"
+
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    lintOptions {
+        abortOnError false
+    }
+
+}
+
+dependencies {
+//    compileOnly  'com.orhanobut:hawk:2.0.1'
+    compileOnly 'com.google.code.gson:gson:2.8.5'
+//    compileOnly 'com.facebook.conceal:conceal:1.1.3@aar'
+}
+
+
+
+//gradlew clean build bintrayUpload -PbintrayUser=httpping -PbintrayKey=363bcd47dd3557230d01c1fb525c0a02e3ae8b92 -PdryRun=false
+
+publish {
+    repoName = 'TPCache'
+    userOrg = 'gbtp'//bintray.com用户名
+    groupId = "gb.tp.cache"//jcenter上的路径
+    artifactId = 'TPCache'//项目名称
+    publishVersion = '1.0.0'//版本号
+    desc = 'gb_bindview'
+    website = 'https://github.com/httpping/tp_bindview'
+}
+
+tasks.withType(JavaCompile){
+    options.encoding = "UTF-8"
+}
+tasks.withType(Javadoc) {
+    options.encoding = "UTF-8"
+}
