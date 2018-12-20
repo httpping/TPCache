@@ -96,20 +96,24 @@ public class CacheManager {
         if (instance == null){
             getInstance();
         }
+        try {
+            CachePackage cachePackage  = new CachePackage();
+            cachePackage.exp = exp;
+            if (cachePackage.exp>0){
+                cachePackage.timestamp = System.currentTimeMillis();
+            }
+            if (value!=null){
+                cachePackage.cls = value.getClass().getName();
+            }
 
-        CachePackage cachePackage  = new CachePackage();
-        cachePackage.exp = exp;
-        if (cachePackage.exp>0){
-            cachePackage.timestamp = System.currentTimeMillis();
+            String txt = instance.converter.toString(value);
+            cachePackage.v = instance.serializer.serialize(txt, value);
+
+            return Hawk.put(key,cachePackage);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-        if (value!=null){
-            cachePackage.cls = value.getClass().getName();
-        }
-
-        String txt = instance.converter.toString(value);
-        cachePackage.v = instance.serializer.serialize(txt, value);
-
-        return Hawk.put(key,cachePackage);
+        return false;
     }
 
     public static <T> T get(String key) {
@@ -121,24 +125,26 @@ public class CacheManager {
         if (instance == null){
             getInstance();
         }
-        CachePackage result = (CachePackage)Hawk.get(key, defaultValue);
 
-        if (result == null){
-            return defaultValue;
-        }
-        if (result.isExp()){
-            //过期了
-            delete(key);
-            return defaultValue;
-        }
-
-        DataInfo dataInfo = instance.serializer.deserialize(result.v);
-        T data;
         try {
+            CachePackage result = (CachePackage)Hawk.get(key);
+
+            if (result == null){
+                return defaultValue;
+            }
+            if (result.isExp()){
+                //过期了
+                delete(key);
+                return defaultValue;
+            }
+
+            DataInfo dataInfo = instance.serializer.deserialize(result.v);
+            T data;
             data  = instance.converter.fromString(dataInfo.cipherText, dataInfo);
             return data;
         } catch (Exception e) {
             e.printStackTrace();
+            delete(key);
         }
 
 

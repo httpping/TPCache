@@ -3,6 +3,7 @@ package com.json.tanping.tpcache;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 
+import com.idescout.sql.SqlScoutServer;
 import com.tp.cache.CacheManager;
 
 public class MainActivity extends AppCompatActivity {
@@ -11,6 +12,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        SqlScoutServer.create(this, getPackageName());
 
 
 
@@ -20,7 +22,10 @@ public class MainActivity extends AppCompatActivity {
 
         CacheManager.count();
 
-        CacheManager.put(key,value,10);
+
+        int abc = CacheManager.get("tp",0);
+
+        CacheManager.put(key,value,1000);
         int a = 0;
         value = CacheManager.get(key,0);
 
