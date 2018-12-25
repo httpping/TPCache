@@ -9,7 +9,7 @@ public final class Hawk {
     // no instance
   }
 
-  static HawkFacade hawkFacade = new HawkFacade.EmptyHawkFacade();
+  public static HawkFacade hawkFacade = new HawkFacade.EmptyHawkFacade();
 
   /**
    * This will init the hawk without password protection.

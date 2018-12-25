@@ -1,6 +1,6 @@
 package com.tp.cache.hawk;
 
-interface Encryption {
+public interface Encryption {
 
   /**
    * Initialize the encryption algorithm, If the device does not support required

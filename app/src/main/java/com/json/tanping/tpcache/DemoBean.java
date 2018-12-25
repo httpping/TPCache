@@ -35,4 +35,6 @@ public class DemoBean {
     public Double d= 23D;
     public int a = 3;
 
+    public String abc ="Q!#V@@sss";
+
 }

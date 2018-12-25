@@ -29,19 +29,21 @@ import android.content.Context;
 import com.google.gson.Gson;
 import com.tp.cache.hawk.Converter;
 import com.tp.cache.hawk.DataInfo;
+import com.tp.cache.hawk.Encryption;
 import com.tp.cache.hawk.GsonParser;
 import com.tp.cache.hawk.Hawk;
 import com.tp.cache.hawk.HawkConverter;
 import com.tp.cache.hawk.HawkSerializer;
 import com.tp.cache.hawk.LogInterceptor;
+import com.tp.cache.hawk.NoEncryption;
 import com.tp.cache.hawk.Parser;
 import com.tp.cache.hawk.Serializer;
 
 
 /**
- * 项目名称: YOSHOP
+ * 项目名称: tpcache
  * 类描述：用于缓存所有类型的数据，并提供了 简单的 base64 加密，防止直接看出文本内容。
- *
+ * 性能 ： 经过实测1000条数据 大约3.5s左右， 每秒可处理240条左右 push
  * 创建人：Created by tanping
  * 创建时间:2018/7/31 14:18
  */
@@ -77,6 +79,7 @@ public class CacheManager {
         }
         instance.getConverter();
         instance.getSerializer();
+        instance.getEncryption();
         return instance;
     }
 
@@ -106,8 +109,11 @@ public class CacheManager {
                 cachePackage.cls = value.getClass().getName();
             }
 
-            String txt = instance.converter.toString(value);
-            cachePackage.v = instance.serializer.serialize(txt, value);
+            String plainText = instance.converter.toString(value);
+            String cipherText = instance.encryption.encrypt(key, plainText);
+            String serializedText = instance.serializer.serialize(cipherText, value);
+
+            cachePackage.v = serializedText;
 
             return Hawk.put(key,cachePackage);
         } catch (Exception e) {
@@ -127,20 +133,22 @@ public class CacheManager {
         }
 
         try {
-            CachePackage result = (CachePackage)Hawk.get(key);
+
+            CachePackage result= Hawk.get(key);
 
             if (result == null){
-                return defaultValue;
+                return  defaultValue;
             }
+
             if (result.isExp()){
                 //过期了
                 delete(key);
                 return defaultValue;
             }
 
-            DataInfo dataInfo = instance.serializer.deserialize(result.v);
-            T data;
-            data  = instance.converter.fromString(dataInfo.cipherText, dataInfo);
+            DataInfo dataInfo =  instance.serializer.deserialize(result.v);
+            String plainText = instance.encryption.decrypt(key, dataInfo.cipherText);
+            T data = instance.converter.fromString(plainText, dataInfo);
             return data;
         } catch (Exception e) {
             e.printStackTrace();
@@ -233,5 +241,14 @@ public class CacheManager {
                 }
             };
         return logInterceptor;
+    }
+
+
+    private  Encryption encryption  ;
+    Encryption getEncryption() {
+        if (encryption == null) {
+            encryption = new NoEncryption();
+        }
+        return encryption;
     }
 }

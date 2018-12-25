@@ -122,6 +122,11 @@ public class DefaultHawkFacade implements HawkFacade {
     return t;
   }
 
+
+  public Encryption getEncryption() {
+    return encryption;
+  }
+
   @Override public long count() {
     return storage.count();
   }
